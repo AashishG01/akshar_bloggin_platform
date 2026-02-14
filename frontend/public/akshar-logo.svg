@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" fill="none">
+  <rect width="400" height="120" fill="#0D0C10"/>
+  <!-- Akshar text -->
+  <text x="20" y="72" font-family="'Playfair Display', Georgia, serif" font-size="56" font-weight="700" fill="#E8E6E3" letter-spacing="-1">
+    Akshar<tspan fill="#3F3CBB">.</tspan>
+  </text>
+  <!-- Devanagari accent -->
+  <text x="22" y="100" font-family="'Noto Serif Devanagari', serif" font-size="14" fill="#504D57" letter-spacing="3">
+    अक्षर
+  </text>
+</svg>
