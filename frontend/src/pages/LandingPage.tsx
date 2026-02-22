@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Feather, Users, Sparkles, BookOpen } from 'lucide-react';
+import { ArrowRight, Feather, Users, Sparkles, BookOpen, Info } from 'lucide-react';
 import api from '@/lib/api';
 import type { Article } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import BlogCard from '@/components/BlogCard';
 import MotionReveal from '@/components/MotionReveal';
 import SectionDivider from '@/components/SectionDivider';
+import { FALLBACK_ARTICLES } from '@/lib/fallbackData';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,13 +40,20 @@ const features = [
 export default function LandingPage() {
     const { isAuthenticated } = useAuth();
     const [blogs, setBlogs] = useState<Article[]>([]);
+    const [usingFallback, setUsingFallback] = useState(false);
     const heroRef = useRef<HTMLDivElement>(null);
     const titleRef = useRef<HTMLHeadingElement>(null);
 
     useEffect(() => {
         api.get('/blogs?limit=5')
-            .then((res) => setBlogs(res.data.data || res.data || []))
-            .catch(console.error);
+            .then((res) => {
+                setBlogs(res.data.data || res.data || []);
+                setUsingFallback(false);
+            })
+            .catch(() => {
+                setBlogs(FALLBACK_ARTICLES);
+                setUsingFallback(true);
+            });
     }, []);
 
     // GSAP hero parallax

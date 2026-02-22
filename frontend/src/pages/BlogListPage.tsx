@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, Info } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '@/lib/api';
 import type { Article } from '@/types';
 import BlogCard from '@/components/BlogCard';
 import MotionReveal from '@/components/MotionReveal';
+import { FALLBACK_ARTICLES } from '@/lib/fallbackData';
 
 export default function BlogListPage() {
     const [blogs, setBlogs] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
+    const [usingFallback, setUsingFallback] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
     const [search, setSearch] = useState(searchParams.get('search') || '');
     const [activeTag, setActiveTag] = useState('');
@@ -21,8 +24,10 @@ export default function BlogListPage() {
                 const endpoint = q ? `/blogs/search?q=${encodeURIComponent(q)}` : '/blogs';
                 const res = await api.get(endpoint);
                 setBlogs(res.data.data || res.data || []);
-            } catch (err) {
-                console.error('Failed to fetch:', err);
+                setUsingFallback(false);
+            } catch {
+                setBlogs(FALLBACK_ARTICLES);
+                setUsingFallback(true);
             } finally {
                 setLoading(false);
             }

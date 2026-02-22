@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Clock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Clock, ArrowLeft, Eye, EyeOff, Info } from 'lucide-react';
 import api from '@/lib/api';
 import type { Article, Comment } from '@/types';
 import { formatDate, readingTime, getInitials } from '@/lib/utils';
@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import LikeButton from '@/components/LikeButton';
 import MotionReveal from '@/components/MotionReveal';
 import SectionDivider from '@/components/SectionDivider';
+import { getFallbackArticleBySlug } from '@/lib/fallbackData';
 
 export default function BlogReadingPage() {
     const { slug } = useParams();
@@ -19,16 +20,24 @@ export default function BlogReadingPage() {
     const [loading, setLoading] = useState(true);
     const [scrollProgress, setScrollProgress] = useState(0);
     const [focusMode, setFocusMode] = useState(false);
+    const [usingFallback, setUsingFallback] = useState(false);
 
     useEffect(() => {
         const fetchBlog = async () => {
             try {
                 const res = await api.get(`/blogs/slug/${slug}`);
                 setBlog(res.data.data || res.data);
+                setUsingFallback(false);
                 const commentsRes = await api.get(`/blogs/${(res.data.data || res.data)._id}/comments`);
                 setComments(commentsRes.data.data || commentsRes.data || []);
-            } catch (err) {
-                console.error(err);
+            } catch {
+                // Try fallback data
+                const fallback = getFallbackArticleBySlug(slug || '');
+                if (fallback) {
+                    setBlog(fallback);
+                    setUsingFallback(true);
+                    setComments([]);
+                }
             } finally {
                 setLoading(false);
             }
@@ -177,7 +186,7 @@ export default function BlogReadingPage() {
                     </h2>
 
                     {/* Comment form */}
-                    {isAuthenticated && (
+                    {isAuthenticated && !usingFallback && (
                         <form onSubmit={handleComment} className="mb-12">
                             <textarea
                                 value={newComment}
